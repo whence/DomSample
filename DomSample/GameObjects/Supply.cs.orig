@@ -1,0 +1,270 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+
+namespace DomSample.GameObjects
+{
+    public class Supply
+    {
+        #region fields
+        private readonly Dictionary<string, CardPile> cardPiles;
+        private readonly ICollection<Card> kingdomCards;
+        private readonly ICollection<Card> attackCards;
+        private readonly ICollection<Card> reactionCards;
+        private readonly ICollection<Card> treasureCards;
+        private readonly ICollection<Card> victoryCards;
+        #endregion
+
+        #region Property
+        public IEnumerable<Card> KingdomCards
+        {
+            get { return this.kingdomCards; }
+        }
+
+        public IEnumerable<Card> AttackCards
+        {
+            get { return attackCards; }
+        }
+
+        public IEnumerable<Card> ReactionCards
+        {
+            get { return reactionCards; }
+        }
+
+        public IEnumerable<Card> TreasureCards
+        {
+            get { return treasureCards; }
+        }
+
+        public IEnumerable<Card> VictoryCards
+        {
+            get { return victoryCards; }
+        }
+        #endregion
+
+        #region constructors
+        public Supply(int playerCount, ICollection<string> kingdomCardNames)
+        {
+            cardPiles = new Dictionary<string, CardPile>(20, StringComparer.OrdinalIgnoreCase);
+            kingdomCards = new List<Card>(kingdomCardNames.Count);
+            attackCards = new List<Card>();
+            reactionCards = new List<Card>();
+            treasureCards = new List<Card>();
+            victoryCards = new List<Card>();
+
+            BuildCardPiles(playerCount, kingdomCardNames);
+        }
+        #endregion
+
+        #region public methods
+        public Card GetCard(ICardInfo cardInfo)
+        {
+            if (cardInfo == null)
+                throw new ArgumentNullException("cardInfo");
+
+            CardPile cardPile;
+            if (!cardPiles.TryGetValue(cardInfo.CardName, out cardPile))
+                return null;
+
+            if (cardPile.RemoveCards(1) == 0)
+                return null;
+
+            return new Card(cardInfo);
+        }
+
+        public Card[] GetCards(ICardInfo cardInfo, int count)
+        {
+            if (cardInfo == null)
+                throw new ArgumentNullException("cardInfo");
+
+            if (count <= 0)
+                throw new ArgumentOutOfRangeException("count", "Must be positive");
+
+            CardPile cardPile;
+            if (!cardPiles.TryGetValue(cardInfo.CardName, out cardPile))
+                return new Card[0];
+
+            count = cardPile.RemoveCards(count);
+
+            var cards = new Card[count];
+            for (int i = 0; i < count; i++)
+            {
+                cards[i] = new Card(cardInfo);
+            }
+            return cards;
+        }
+
+        public bool IsDry()
+        {
+            if (cardPiles["Province"].IsEmpty)
+                return true;
+
+            int emptyPileCount = 0;
+            foreach (var pair in cardPiles)
+            {
+                if (pair.Value.IsEmpty)
+                    emptyPileCount++;
+            }
+            return (emptyPileCount >= 3);
+        }
+
+        public void Display(TextWriter writer)
+        {
+            writer.WriteLine("Cards on supply");
+            foreach (var pair in cardPiles)
+            {
+                if (pair.Value.CardCount < 10)
+                {
+                    writer.Write(' ');
+                }
+                writer.Write(pair.Value.CardCount);
+                writer.Write(' ');
+                writer.Write(pair.Key);
+                writer.Write(" [cost:");
+                writer.Write(CardCentral.Shared.GetCardInfo(pair.Key).Cost);
+                writer.Write(']');
+
+                writer.WriteLine();
+            }
+        }
+        #endregion
+
+        #region private methods
+        private void BuildCardPiles(int playerCount, ICollection<string> kingdomCardNames)
+        {
+            if (playerCount < 1 || playerCount > 4)
+                throw new ArgumentException("must be between 1 to 4 players", "playerCount");
+            
+            // kingdome cards
+            kingdomCardNames = new HashSet<string>(kingdomCardNames, StringComparer.OrdinalIgnoreCase);
+            if (kingdomCardNames.Count != 10)
+                throw new ArgumentException("must have 10 kingdome cards", "kingdomCardNames");
+
+            foreach (var cardName in kingdomCardNames)
+            {
+                var cardInfo = CardCentral.Shared.GetCardInfo(cardName);
+                if (cardInfo == null)
+                    throw new ArgumentException("unknown card:" + cardName);
+
+                if (!cardInfo.IsKingdomCard)
+                    throw new ArgumentException(cardName + " is not a kingdom card");
+
+                if (cardInfo.IsVictoryCard)
+                {
+                    switch (playerCount)
+                    {
+                        case 1:
+                        case 2:
+                            AddCards(cardInfo.CardName, 8);
+                            break;
+
+                        case 3:
+                        case 4:
+                            AddCards(cardInfo.CardName, 12);
+                            break;
+                    }
+                }
+                else
+                {
+                    AddCards(cardInfo.CardName, 10);
+                }
+            }
+
+            // treasure cards
+            AddCards("Copper", 60);
+            AddCards("Silver", 40);
+            AddCards("Gold", 30);
+
+            // victory cards
+            switch (playerCount)
+            {
+                case 1:
+                case 2:
+                    AddCards("Estate", 8);
+                    AddCards("Duchy", 8);
+                    AddCards("Province", 8);
+                    break;
+
+                case 3:
+                case 4:
+                    AddCards("Estate", 12);
+                    AddCards("Duchy", 12);
+                    AddCards("Province", 12);
+                    break;
+            }
+
+            // curse cards
+            switch (playerCount)
+            {
+                case 1:
+                case 2:
+                    AddCards("Curse", 10);
+                    break;
+
+                case 3:
+                    AddCards("Curse", 20);
+                    break;
+
+                case 4:
+                    AddCards("Curse", 30);
+                    break;
+            }
+
+            // initial player deck
+            AddCards("Estate", 3*playerCount);
+            AddCards("Copper", 7*playerCount);
+        }
+
+        private void AddCards(string cardName, int count)
+        {
+            if (string.IsNullOrEmpty(cardName))
+                throw new ArgumentNullException("cardName");
+
+            var cardInfo = CardCentral.Shared.GetCardInfo(cardName);
+            if (cardInfo == null)
+                throw new ArgumentException("unknown card:" + cardName);
+
+            if (count < 0)
+                throw new ArgumentOutOfRangeException("count", "Cannot be negative");
+
+            CardPile cardPile;
+            if (!cardPiles.TryGetValue(cardInfo.CardName, out cardPile))
+            {
+                cardPile = new CardPile();
+                cardPiles.Add(cardInfo.CardName, cardPile);
+            }
+            cardPile.AddCards(count);
+        }
+        #endregion
+
+        #region inner classes
+        private class CardPile
+        {
+            #region properties
+            public int CardCount { get; private set; }
+            public bool IsEmpty
+            {
+                get { return (CardCount <= 0); }
+            }
+            #endregion
+
+            #region methods
+            public void AddCards(int count)
+            {
+                CardCount += count;
+            }
+
+            public int RemoveCards(int count)
+            {
+                if (count > CardCount)
+                    count = CardCount;
+
+                CardCount -= count;
+
+                return count;
+            }
+            #endregion
+        }
+        #endregion
+    }
+}

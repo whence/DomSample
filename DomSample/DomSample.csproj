@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{2E999B69-6F2A-4626-81CA-CCD3F4D76232}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DomSample</RootNamespace>
+    <AssemblyName>DomSample</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="GameObjects\AI\AIPlayer\BigMoneyAIPlayer.cs" />
+    <Compile Include="GameObjects\AI\AIPlayer\GrandSmithyAIPlayer.cs" />
+    <Compile Include="GameObjects\AI\AIPlayer\TestAIPlayer.cs" />
+    <Compile Include="GameObjects\AI\AIPlayer\WeightingBuyAIPlayer.cs" />
+    <Compile Include="GameObjects\AI\BuyStrategy.cs" />
+    <Compile Include="GameObjects\AI\GeneralAIHelper.cs" />
+    <Compile Include="GameObjects\AIPlayer.cs" />
+    <Compile Include="GameObjects\AI\SpecialActionAI.cs" />
+    <Compile Include="GameObjects\Card.cs" />
+    <Compile Include="GameObjects\CardPile.cs" />
+    <Compile Include="GameObjects\Game.cs" />
+    <Compile Include="GameObjects\Game.Resolution.cs" />
+    <Compile Include="GameObjects\GameInfo.cs" />
+    <Compile Include="GameObjects\ICardInfo.cs" />
+    <Compile Include="GameObjects\IGame.cs" />
+    <Compile Include="GameObjects\IGameInfo.cs" />
+    <Compile Include="GameObjects\InstructionKeyword.cs" />
+    <Compile Include="GameObjects\CardCentral.cs" />
+    <Compile Include="GameObjects\Player.cs" />
+    <Compile Include="GameObjects\Instruction.cs" />
+    <Compile Include="GameObjects\PlayerType.cs" />
+    <Compile Include="GameObjects\Supply.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\Chars.cs" />
+    <Compile Include="Utils\CollectionExtensions.cs" />
+    <Compile Include="Utils\EnumerableHelper.cs" />
+    <Compile Include="Utils\LoopEnumerator.cs" />
+    <Compile Include="Utils\Maths.cs" />
+    <Compile Include="Utils\Singleton.cs" />
+    <Compile Include="Utils\Texts.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
